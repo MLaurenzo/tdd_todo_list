@@ -1,7 +1,6 @@
-from django.forms import modelformset_factory
-from django.http import JsonResponse, HttpResponse
+from django.forms import modelform_factory
+from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 
@@ -10,19 +9,17 @@ from todo_list.serializers import TodoSerializer
 
 
 def index(request):
-    template = loader.get_template('todo_list/index.html')
-    context = {}
-
-    TodoFormSet = modelformset_factory(Todo, fields=('__all__'))
+    TodoForm = modelform_factory(Todo, fields=('__all__'))
     if request.method == 'POST':
-        formset = TodoFormSet(request.POST, request.FILES)
-        print(formset)
-        if formset.is_valid():
-            formset.save()
-            # do something.
+        form = TodoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/tdd_todo_list/')
     else:
-        formset = TodoFormSet()
-    return render(request, 'todo_list/index.html', {'formset': formset})
+        form = TodoForm()
+        todo_list = Todo.objects.all()
+    return render(request, 'todo_list/index.html', {'form': form, 'todo_list': todo_list})
+
 
 @csrf_exempt
 def todo_list(request):
@@ -41,6 +38,7 @@ def todo_list(request):
             serializer.save()
             return JsonResponse(serializer.data, status=201)
         return JsonResponse(serializer.errors, status=400)
+
 
 @csrf_exempt
 def todo_detail(request, pk):

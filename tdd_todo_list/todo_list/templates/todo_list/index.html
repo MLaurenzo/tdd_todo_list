@@ -5,8 +5,18 @@
     <title>TDD todo list</title>
 </head>
 <body>
-<form action="/tdd_todo_list">
-    <input type="text" name="newtask"><input type="submit" value="Add task">
+{% if todo_list %}
+    <ul>
+    {% for todo in todo_list %}
+        <li>{{ todo.todo }}</li>
+    {% endfor %}
+    </ul>
+{% endif %}
+
+<form action="/tdd_todo_list/" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit">
 </form>
 </body>
 </html>
